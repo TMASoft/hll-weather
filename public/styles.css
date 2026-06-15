@@ -1,0 +1,112 @@
+.hll-weather-loading,
+.hll-weather-error {
+  color: var(--muted);
+  padding: 12px 0;
+}
+.hll-weather-error,
+.hll-weather-error-note {
+  color: var(--danger);
+}
+.hll-weather-card {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.9fr) minmax(260px, 1.1fr);
+  gap: 14px;
+}
+.hll-weather-current {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--primary) 14%, var(--surface-2)), var(--surface-2));
+}
+.hll-weather-kicker {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.hll-weather-current strong {
+  display: block;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 1;
+  margin: 6px 0;
+}
+.hll-weather-current p,
+.hll-weather-current small {
+  margin: 0;
+  color: var(--muted);
+}
+.hll-weather-icon {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1;
+}
+.hll-weather-forecast {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.hll-weather-daily {
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.hll-weather-chip {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+.hll-weather-chip span,
+.hll-weather-chip small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.hll-weather-chip strong {
+  color: var(--ink);
+  white-space: nowrap;
+}
+.hll-weather-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+}
+.hll-weather-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+.hll-weather-empty h3 {
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+.hll-weather-empty p {
+  margin: 6px 0 0;
+}
+.hll-weather-card.is-warning .hll-weather-current {
+  border-color: color-mix(in srgb, var(--warning) 45%, var(--line));
+}
+@media (max-width: 860px) {
+  .hll-weather-card,
+  .hll-weather-current {
+    grid-template-columns: 1fr;
+  }
+  .hll-weather-forecast,
+  .hll-weather-daily {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 520px) {
+  .hll-weather-forecast,
+  .hll-weather-daily {
+    grid-template-columns: 1fr;
+  }
+}

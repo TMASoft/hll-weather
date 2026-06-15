@@ -1,0 +1,21 @@
+{
+  "id": "hll-weather",
+  "name": "HLL Weather",
+  "version": "0.1.0",
+  "launcherApiVersion": "1",
+  "backend": "server/index.js",
+  "frontend": "public/plugin.js",
+  "permissions": ["routes", "storage", "jobs", "dashboard-section"],
+  "configSchema": {
+    "sectionTitle": { "type": "string", "default": "Weather", "scope": "editor", "description": "Dashboard section title." },
+    "enabled": { "type": "boolean", "default": true, "scope": "editor", "description": "Show the weather dashboard section." },
+    "label": { "type": "string", "default": "", "scope": "editor", "description": "Display label for the configured location." },
+    "latitude": { "type": "number", "default": null, "scope": "editor", "description": "Latitude for the forecast location." },
+    "longitude": { "type": "number", "default": null, "scope": "editor", "description": "Longitude for the forecast location." },
+    "units": { "enum": ["fahrenheit", "celsius"], "default": "fahrenheit", "scope": "editor", "description": "Temperature units." },
+    "refreshMinutes": { "type": "number", "default": 5, "scope": "editor", "description": "Server refresh interval in minutes. Minimum 5." },
+    "uiAutoRefresh": { "type": "boolean", "default": false, "scope": "editor", "description": "Enable browser auto-refresh." },
+    "uiAutoRefreshInterval": { "type": "number", "default": 300, "scope": "editor", "description": "Browser auto-refresh interval in seconds. Minimum 60." },
+    "coordinatePrecision": { "type": "number", "default": 2, "scope": "admin", "description": "Decimal places sent to Open-Meteo. Lower values reduce location precision; 2 is roughly city/neighborhood level." }
+  }
+}
