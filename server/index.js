@@ -1,5 +1,5 @@
 const CACHE_KEY = 'weather';
-const SEARCH_USER_AGENT = 'home-lab-launcher-plugin-hll-weather/0.1.0';
+const SEARCH_USER_AGENT = 'home-lab-launcher-plugin-hll-weather/0.2.0';
 
 function pluginConfig(context) {
   const cfg = context.getConfig();

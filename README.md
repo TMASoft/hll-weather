@@ -14,17 +14,23 @@ Privacy notes:
 
 ## Configuration
 
-Install the plugin, then configure it in **Admin -> Plugins -> HLL Weather**.
+After installing the plugin, administrators and editors can configure the weather location directly from the dashboard or via the plugin settings page.
 
-Important fields:
+### City Search (Recommended)
+You can search for and select your city without needing to manually look up latitude and longitude:
+- **First-time setup**: If weather isn't configured, a search box is displayed directly on the dashboard widget for editors and admins.
+- **Updating location**: Click the **"Change city"** button on the active weather card to bring up the search interface at any time.
 
-- `label`: Display name for the location.
-- `latitude` and `longitude`: Forecast coordinates.
-- `units`: `fahrenheit` or `celsius`.
-- `coordinatePrecision`: Admin-only coordinate rounding before upstream requests. Lower precision improves location privacy but can reduce forecast locality.
-- `refreshMinutes`: Server refresh interval. Minimum 5 minutes.
+### Manual Settings
+Alternatively, configuration can be managed in **Admin -> Plugins -> HLL Weather** using the following fields:
 
-Use `/api/plugins/hll-weather/search?q=<city>` as an editor/admin helper for Open-Meteo geocoding, or enter coordinates directly.
+- `label`: Display name for the location (e.g., city name).
+- `latitude` and `longitude`: Exact decimal forecast coordinates.
+- `units`: Temperature unit (`fahrenheit` or `celsius`).
+- `coordinatePrecision`: Admin-only decimal rounding (default `2`) applied before upstream requests. Lower precision improves location privacy but can slightly reduce forecast locality.
+- `refreshMinutes`: Server-side API refresh interval (minimum 5 minutes).
+
+Under the hood, the widget uses the `/api/plugins/hll-weather/search?q=<city>` geocoding endpoint to query Open-Meteo locations.
 
 ## Local Development
 

@@ -1,7 +1,7 @@
 {
   "id": "hll-weather",
   "name": "HLL Weather",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "launcherApiVersion": "1",
   "backend": "server/index.js",
   "frontend": "public/plugin.js",
