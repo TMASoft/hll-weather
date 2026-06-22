@@ -2,6 +2,17 @@
 
 Home Lab Launcher plugin for displaying weather as an optional dashboard section.
 
+## Themes and layout
+
+The widget keeps the default emoji/weather-card design unless a viewer chooses another theme. The theme selector is stored as a Home Lab Launcher per-user plugin preference, so each signed-in user can choose independently. Anonymous viewers in public-read deployments keep the choice in browser local storage.
+
+Available themes:
+
+- `Default`: the original weather card with emoji condition graphics.
+- `Pixel`: CSS-rendered animated pixel art for clear, cloudy, fog, rain, storm, snow, and hail/freezing precipitation condition groups.
+
+Pixel animations respect the browser `prefers-reduced-motion` setting. The dashboard layout is responsive: the main card stacks on tablet-sized screens, forecast rows become touch-friendly horizontal rails, and search/theme controls stack on phones.
+
 ## Provider
 
 This first version uses [Open-Meteo](https://open-meteo.com/) only. Open-Meteo provides a no-sign-up, no-API-key forecast API for non-commercial use.

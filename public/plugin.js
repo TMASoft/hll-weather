@@ -14,10 +14,11 @@ const hllWeatherHourFormatter = new Intl.DateTimeFormat([], { hour: 'numeric' })
 window.HomeLabLauncher.registerPluginSection({
   id: 'weather',
   title: 'Weather',
-  render: async ({ container, api, user }) => {
+  render: async ({ container, api, user, preferences = {}, setPluginPreference }) => {
     const canEdit = ['admin', 'editor'].includes(user?.role);
     let autoRefreshTimer = null;
     let lastConfig = { uiAutoRefresh: false, uiAutoRefreshInterval: 300 };
+    let currentTheme = preferences.theme === 'pixel' ? 'pixel' : 'default';
 
     function renderSearchForm(showBackButton) {
       if (autoRefreshTimer) {
@@ -161,6 +162,7 @@ window.HomeLabLauncher.registerPluginSection({
         const current = data.weather?.current || {};
         const daily = data.weather?.daily || {};
         const code = hllWeatherCodes[current.weather_code] || ['Conditions unavailable', '🌤️', '🌙'];
+        const isDay = Number(current.is_day) === 1;
         const unit = data.location.units === 'celsius' ? 'C' : 'F';
         const temp = Number(current.temperature_2m);
         const feelsLike = Number(current.apparent_temperature);
@@ -170,7 +172,7 @@ window.HomeLabLauncher.registerPluginSection({
         const errorText = data.lastError ? `<small class="hll-weather-error-note">Last refresh error: ${escapeHtml(data.lastError)}</small>` : '';
 
         container.innerHTML = `
-          <section class="hll-weather-card ${data.source === 'stale_cache' ? 'is-warning' : ''}" aria-label="Weather">
+          <section class="hll-weather-card hll-weather-theme-${escapeHtml(currentTheme)} ${data.source === 'stale_cache' ? 'is-warning' : ''}" aria-label="Weather">
             <div class="hll-weather-current">
               <div>
                 <span class="hll-weather-kicker">${escapeHtml(data.location.label || data.title || 'Weather')}</span>
@@ -179,11 +181,14 @@ window.HomeLabLauncher.registerPluginSection({
                 <small>H ${Number.isFinite(high) ? Math.round(high) : '-'}° · L ${Number.isFinite(low) ? Math.round(low) : '-'}° · ${sourceText} ${data.fetchedAt ? new Date(data.fetchedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : 'never'}</small>
                 ${errorText}
               </div>
-              <span class="hll-weather-icon">${Number(current.is_day) === 1 ? code[1] : code[2]}</span>
+              ${weatherVisualHtml(current.weather_code, isDay, 'hll-weather-icon')}
             </div>
             <div class="hll-weather-forecast" aria-label="Hourly forecast">${hourlyHtml(data.weather || {})}</div>
             <div class="hll-weather-forecast hll-weather-daily" aria-label="7 day forecast">${dailyHtml(data.weather || {})}</div>
-            ${canEdit ? '<div class="hll-weather-actions"><button class="ghost" id="hll-weather-change-city" type="button">Change city</button><button class="ghost" id="hll-weather-refresh" type="button">Refresh weather</button></div>' : ''}
+            <div class="hll-weather-actions">
+              <label class="hll-weather-theme-control">Theme <select id="hll-weather-theme" aria-label="Weather theme"><option value="default" ${currentTheme === 'default' ? 'selected' : ''}>Default</option><option value="pixel" ${currentTheme === 'pixel' ? 'selected' : ''}>Pixel</option></select></label>
+              ${canEdit ? '<button class="ghost" id="hll-weather-change-city" type="button">Change city</button><button class="ghost" id="hll-weather-refresh" type="button">Refresh weather</button>' : ''}
+            </div>
           </section>
         `;
         bind();
@@ -210,10 +215,10 @@ window.HomeLabLauncher.registerPluginSection({
         .slice(0, 8)
         .map((item) => {
           const code = hllWeatherCodes[item.code] || ['Forecast', '🌤️', '🌙'];
-          const icon = item.isDay === 0 ? code[2] : code[1];
+          const isDay = item.isDay !== 0;
           const temp = Number.isFinite(item.temp) ? `${Math.round(item.temp)}°` : '-°';
           const precip = Number.isFinite(item.precip) ? `${Math.round(item.precip)}%` : '-';
-          return `<article class="hll-weather-chip" title="${escapeHtml(code[0])}"><span>${escapeHtml(item.label)}</span><strong>${escapeHtml(icon)} ${escapeHtml(temp)}</strong><small>${escapeHtml(precip)}</small></article>`;
+          return `<article class="hll-weather-chip" title="${escapeHtml(code[0])}"><span>${escapeHtml(item.label)}</span><strong>${weatherVisualHtml(item.code, isDay, 'hll-weather-chip-icon')} ${escapeHtml(temp)}</strong><small>${escapeHtml(precip)}</small></article>`;
         }).join('');
     }
 
@@ -224,8 +229,30 @@ window.HomeLabLauncher.registerPluginSection({
         const high = Number((daily.temperature_2m_max || [])[index]);
         const low = Number((daily.temperature_2m_min || [])[index]);
         const precip = Number((daily.precipitation_probability_max || [])[index]);
-        return `<article class="hll-weather-chip hll-weather-day-chip" title="${escapeHtml(code[0])}"><span>${escapeHtml(index === 0 ? 'Today' : hllWeatherDayFormatter.format(new Date(`${time}T12:00:00`)))}</span><strong>${escapeHtml(code[1])} ${Number.isFinite(high) ? Math.round(high) : '-'}°/${Number.isFinite(low) ? Math.round(low) : '-'}°</strong><small>${Number.isFinite(precip) ? Math.round(precip) : '-'}%</small></article>`;
+        return `<article class="hll-weather-chip hll-weather-day-chip" title="${escapeHtml(code[0])}"><span>${escapeHtml(index === 0 ? 'Today' : hllWeatherDayFormatter.format(new Date(`${time}T12:00:00`)))}</span><strong>${weatherVisualHtml((daily.weather_code || [])[index], true, 'hll-weather-chip-icon')} ${Number.isFinite(high) ? Math.round(high) : '-'}°/${Number.isFinite(low) ? Math.round(low) : '-'}°</strong><small>${Number.isFinite(precip) ? Math.round(precip) : '-'}%</small></article>`;
       }).join('');
+    }
+
+    function weatherKind(code) {
+      if ([0, 1].includes(Number(code))) return 'clear';
+      if (Number(code) === 2) return 'partly-cloudy';
+      if (Number(code) === 3) return 'cloudy';
+      if ([45, 48].includes(Number(code))) return 'fog';
+      if ([51, 53, 55, 61, 63, 66, 67, 80, 81].includes(Number(code))) return 'rain';
+      if ([65, 82, 95, 96, 99].includes(Number(code))) return 'storm';
+      if ([71, 73, 75, 77, 85, 86].includes(Number(code))) return 'snow';
+      if ([56, 57].includes(Number(code))) return 'hail';
+      return 'partly-cloudy';
+    }
+
+    function pixelWeatherHtml(kind, isDay, className) {
+      return `<span class="${escapeHtml(className)} hll-weather-pixel hll-weather-pixel-${escapeHtml(kind)} ${isDay ? 'is-day' : 'is-night'}" aria-hidden="true"><i></i><b></b><em></em></span>`;
+    }
+
+    function weatherVisualHtml(codeValue, isDay, className) {
+      const code = hllWeatherCodes[codeValue] || ['Forecast', '🌤️', '🌙'];
+      if (currentTheme === 'pixel') return pixelWeatherHtml(weatherKind(codeValue), isDay, className);
+      return `<span class="${escapeHtml(className)}">${escapeHtml(isDay ? code[1] : code[2])}</span>`;
     }
 
     function bind() {
@@ -243,6 +270,17 @@ window.HomeLabLauncher.registerPluginSection({
       if (changeCityButton) {
         changeCityButton.addEventListener('click', () => {
           renderSearchForm(true);
+        });
+      }
+      const themeSelect = container.querySelector('#hll-weather-theme');
+      if (themeSelect) {
+        themeSelect.addEventListener('change', async () => {
+          currentTheme = themeSelect.value === 'pixel' ? 'pixel' : 'default';
+          if (setPluginPreference) {
+            try { await setPluginPreference('theme', currentTheme); }
+            catch (error) { console.error('Failed to save weather theme:', error); }
+          }
+          await render();
         });
       }
     }
